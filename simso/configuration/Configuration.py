@@ -38,13 +38,14 @@ class Configuration(object):
     of this class will be passed to the constructor of the
     :class:`Model <simso.core.Model.Model>` class.
     """
-    def __init__(self, filename=None):
+    def __init__(self, node_name, filename=None):
         """
         Args:
             - `filename` A file can be used to initialize the configuration.
         """
         if filename:
             parser = Parser(filename)
+            self.node_name = node_name
             self.etm = parser.etm
             self.duration = parser.duration
             self.cycles_per_ms = parser.cycles_per_ms
@@ -58,6 +59,7 @@ class Configuration(object):
             self.penalty_preemption = parser.penalty_preemption
             self.penalty_migration = parser.penalty_migration
         else:
+            self.node_name = node_name
             self.etm = "wcet"
             self.duration = 100000000
             self.penalty_preemption = 0
@@ -170,7 +172,10 @@ class Configuration(object):
                 "Context Load overhead can't be negative."
 
     def check_tasks(self):
-        assert len(self._task_info_list) > 0, "At least one task is needed."
+
+        if not self.task_info_list:
+            return
+
         for index, task in enumerate(self._task_info_list):
             # Id unique :
             assert task.identifier not in [

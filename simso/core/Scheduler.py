@@ -79,7 +79,7 @@ class SchedulerInfo(object):
                 print("Path: {}".format(self.filename))
             return None
 
-    def instantiate(self, model):
+    def instantiate(self, node, sim):
         """
         Instantiate the :class:`Scheduler` class.
 
@@ -89,7 +89,7 @@ class SchedulerInfo(object):
         """
         clas = self.get_cls()
         if clas:
-            return clas(model, self)
+            return clas(node, sim, self)
 
 
 class Scheduler(object):
@@ -117,7 +117,7 @@ class Scheduler(object):
     overriding the :meth:`get_lock` and :meth:`release_lock` methods.
     """
 
-    def __init__(self, sim, scheduler_info, **kwargs):
+    def __init__(self, node, sim, scheduler_info, **kwargs):
         """
         Args:
 

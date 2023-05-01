@@ -52,17 +52,17 @@ class Processor(Process):
     def init(cls):
         cls._identifier = 0
 
-    def __init__(self, model, proc_info):
-        Process.__init__(self, name=proc_info.name, sim=model)
-        self._model = model
+    def __init__(self, node, sim, proc_info):
+        Process.__init__(self, name=proc_info.name, sim=sim)
+        self._node = node
         self._internal_id = Processor._identifier
         Processor._identifier += 1
         self.identifier = proc_info.identifier
         self._running = None
         self.was_running = None
         self._evts = deque([])
-        self.sched = model.scheduler
-        self.monitor = Monitor(name="Monitor" + proc_info.name, sim=model)
+        self.sched = node.scheduler
+        self.monitor = Monitor(name="Monitor" + proc_info.name, sim=sim)
         self._caches = []
         self._penalty = proc_info.penalty
         self._cs_overhead = proc_info.cs_overhead
@@ -70,7 +70,7 @@ class Processor(Process):
         self._migration_overhead = proc_info.migration_overhead
         self.set_caches(proc_info.caches)
         self.timer_monitor = Monitor(name="Monitor Timer" + proc_info.name,
-                                     sim=model)
+                                     sim=sim)
         self._speed = proc_info.speed
 
     def resched(self):

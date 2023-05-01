@@ -315,10 +315,8 @@ class PTask(GenericTask):
         yield hold, self, int(self._task_info.activation_date *
                               self._sim.cycles_per_ms)
 
-        while True:
-            #print self.sim.now(), "activate", self.name
-            self.create_job()
-            yield hold, self, int(self.period * self._sim.cycles_per_ms)
+        #print self.sim.now(), "activate", self.name
+        self.create_job()
 
 
 class SporadicTask(GenericTask):
