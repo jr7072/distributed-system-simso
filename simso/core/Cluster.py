@@ -3,7 +3,6 @@ from simso.core.Node import Node
 from simso.core.ClusterEvent import ClusterEvent, ClusterFailedSchedule,\
     ClusterPassSchedule, ClusterScheduleTask, ClusterNewTask
 from simso.core.ClusterTask import ClusterGenerator
-from simso.core.NodeEvent import NodeEvent
 from simso.core.Task import Task
 from collections import deque
 
@@ -66,7 +65,8 @@ class Cluster(Process):
         if task_util + lowest_utilization > 1:
             return None
     
-        return Task(sim=self.sim, task_info=task_info)
+        return Task(node=lowest_utilization_node,
+                        sim=self.sim, task_info=task_info)
 
     def start_cluster(self):
 

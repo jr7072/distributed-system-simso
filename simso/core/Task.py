@@ -365,9 +365,10 @@ task_types = {
     "Periodic": PTask,
     "APeriodic": ATask,
     "Sporadic": SporadicTask,
+    "Cluster": CTask
 }
 
-task_types_names = ["Periodic", "APeriodic", "Sporadic"]
+task_types_names = ["Periodic", "APeriodic", "Sporadic", "Cluster"]
 
 
 def Task(sim, task_info):
