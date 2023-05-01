@@ -26,7 +26,6 @@ class Cluster(Process):
         for node_config in self.node_config_list:
             self.node_list.append(Node(node_config, sim))
 
-        self.task_generator_list = []
         self.evts = deque([])
         self.cluster_utilization = 0
     
@@ -83,10 +82,8 @@ class Cluster(Process):
                 self.sim.monitor.observe(ClusterNewTask(self.cluster_name))
 
                 task_generator = evt[1]
-                self.task_generator_list.append(task)
                 self.sim.activate(task, task.start_generator())
         
-
             if evt[0] == ClusterEvent.SCHEDULE_TASK:
                 
                 self.sim.monitor.observe(ClusterScheduleTask(self.cluster_name))
