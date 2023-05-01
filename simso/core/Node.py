@@ -8,7 +8,7 @@ from simso.core.Timer import Timer
 from simso.core.etm import execution_time_models
 from simso.core.Logger import Logger
 from simso.core.results import Results
-from simso.core.NodeEvents import NodeEvent, NodeNewTaskEvent
+from simso.core.NodeEvent import NodeEvent, NodeNewTaskEvent
 
 
 class Node(Process):
@@ -144,9 +144,9 @@ class Node(Process):
             evt = self.evts.popleft()
 
             if evt[0] == NodeEvent.NEW_TASK:
+                
+                task = evt[1]
+
                 self.sim.monitor.observe(NodeNewTaskEvent(self.node_name))
-                self.scheduler.add_task(evt[1])
-                self.sim.activate(evt[1], evt[1].execute())
-
-
-
+                self.scheduler.add_task(task)
+                self.sim.activate(task, task.run())

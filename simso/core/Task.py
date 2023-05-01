@@ -117,7 +117,7 @@ class GenericTask(Process):
     """
     fields = []
 
-    def __init__(self, sim, task_info):
+    def __init__(self, node, sim, task_info):
         """
         Args:
 
@@ -133,7 +133,7 @@ class GenericTask(Process):
         self._monitor = Monitor(name="Monitor" + self.name + "_states",
                                 sim=sim)
         self._activations_fifo = deque([])
-        self._sim = sim
+        self._node = node
         self.cpu = None
         self._etm = sim.etm
         self._job_count = 0
@@ -236,7 +236,7 @@ class GenericTask(Process):
         Task that is activated by the end of a job from this task.
         """
         if self._task_info.followed_by is not None:
-            followed = [x for x in self._sim.task_list
+            followed = [x for x in self.node.task_list
                         if (x.identifier == self._task_info.followed_by)]
             if followed:
                 return followed[0]
@@ -271,10 +271,11 @@ class GenericTask(Process):
         Create a new job from this task. This should probably not be used
         directly by a scheduler.
         """
+            
         self._job_count += 1
         job = Job(self, "{}_{}".format(self.name, self._job_count), pred,
                   monitor=self._monitor, etm=self._etm, sim=self.sim)
-
+        
         if len(self._activations_fifo) == 0:
             self.job = job
             self.sim.activate(job, job.activate_job())
@@ -287,7 +288,7 @@ class GenericTask(Process):
 
     def _init(self):
         if self.cpu is None:
-            self.cpu = self._sim.processors[0]
+            self.cpu = self.node.processors[0]
 
 
 class ATask(GenericTask):
@@ -315,9 +316,10 @@ class PTask(GenericTask):
         yield hold, self, int(self._task_info.activation_date *
                               self._sim.cycles_per_ms)
 
-        #print self.sim.now(), "activate", self.name
-        self.create_job()
-
+        while True:
+            #print self.sim.now(), "activate", self.name
+            self.create_job()
+            yield hold, self, int(self.period * self._sim.cycles_per_ms)
 
 class SporadicTask(GenericTask):
     """
@@ -339,10 +341,30 @@ class SporadicTask(GenericTask):
         return self._task_info.list_activation_dates
 
 
+class CTask(GenericTask):
+
+    """
+    Cluster Periodic Task process. Inherits from :class:`GenericTask`. The jobs are
+    created periodically.
+    """
+
+    fields = ['activation_date', 'period', 'deadline', 'wcet']
+
+    def execute(self):
+        self._init()
+        # wait the activation date.
+        yield hold, self, int(self._task_info.activation_date *
+                                self._sim.cycles_per_ms)
+
+
+        #print self.sim.now(), "activate", self.name
+        self.create_job()
+
+
 task_types = {
     "Periodic": PTask,
     "APeriodic": ATask,
-    "Sporadic": SporadicTask
+    "Sporadic": SporadicTask,
 }
 
 task_types_names = ["Periodic", "APeriodic", "Sporadic"]

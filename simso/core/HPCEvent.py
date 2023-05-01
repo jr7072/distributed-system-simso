@@ -1,5 +1,5 @@
 
-class NodeEvent(object):
+class HPCEvent(object):
 
     NEW_TASK = 1
 
@@ -7,7 +7,7 @@ class NodeEvent(object):
         self.event = event
 
 
-class NodeNewTaskEvent(NodeEvent):
+class HPCNewTaskEvent(HPCEvent):
     
     def __init__(self, node):
-        NodeEvent.__init__(self, NodeEvent.NEW_TASK, node)
+        HPCEvent.__init__(self, HPCEvent.NEW_TASK, node)
