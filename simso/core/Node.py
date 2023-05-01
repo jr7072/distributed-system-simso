@@ -8,7 +8,7 @@ from simso.core.Timer import Timer
 from simso.core.etm import execution_time_models
 from simso.core.Logger import Logger
 from simso.core.results import Results
-from simso.core.NodeEvent import NodeEvent, NodeNewTaskEvent
+from simso.core.NodeEvent import NodeEvent, NodeNewTaskEvent, NodeTaskTerminateEvent
 
 
 class Node(Process):
@@ -35,6 +35,7 @@ class Node(Process):
         proc_info_list = configuration.proc_info_list
 
         self.sim = sim
+        self.util = 0
         self._duration = configuration.duration 
         self._cycles_per_ms = configuration.cycles_per_ms
         self.scheduler = configuration.scheduler_info.instantiate(self, sim)
@@ -128,6 +129,10 @@ class Node(Process):
         if self._callback:
             self._callback(self.now())
 
+    def new_task(self, task):
+
+        self.evts.append((NodeEvent.NEW_TASK, task))
+
     def start_node(self):
         
         """ Simulate a Node """
@@ -146,7 +151,7 @@ class Node(Process):
             if evt[0] == NodeEvent.NEW_TASK:
                 
                 task = evt[1]
-
                 self.sim.monitor.observe(NodeNewTaskEvent(self.node_name))
                 self.scheduler.add_task(task)
                 self.sim.activate(task, task.run())
+             

@@ -2,6 +2,7 @@
 
 class ClusterEvent(object):
 
+    NEW_TASK = 1
     SCHEDULE_TASK = 2
     FAILED_SCHEDULE = 3
     PASS_SCHEDULE = 4
