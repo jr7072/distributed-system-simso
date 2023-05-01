@@ -371,10 +371,10 @@ task_types = {
 task_types_names = ["Periodic", "APeriodic", "Sporadic", "Cluster"]
 
 
-def Task(sim, task_info):
+def Task(node, sim, task_info):
     """
     Task factory. Return and instantiate the correct class according to the
     task_info.
     """
 
-    return task_types[task_info.task_type](sim, task_info)
+    return task_types[task_info.task_type](node, sim, task_info)

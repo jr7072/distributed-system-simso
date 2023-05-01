@@ -63,11 +63,14 @@ class Cluster(Process):
         
         if task_util + lowest_utilization > 1:
             return None
-    
+
         return Task(node=lowest_utilization_node,
                         sim=self.sim, task_info=task_info)
 
     def start_cluster(self):
+
+        for node in self.node_list:
+            node.start_node()
 
         while True:
 

@@ -180,12 +180,14 @@ class Processor(Process):
                 self.sched.monitor_begin_activate(self)
                 yield hold, self, self.sched.overhead_activate
                 self.sched.monitor_end_activate(self)
+                self._node.util += evt[1].wcet / evt[1].period
             elif evt[0] == TERMINATE:
                 self.sched.on_terminated(evt[1])
                 self.monitor.observe(ProcOverheadEvent("JobTermination"))
                 self.sched.monitor_begin_terminate(self)
                 yield hold, self, self.sched.overhead_terminate
                 self.sched.monitor_end_terminate(self)
+                self._node.util -= evt[1].wcet / evt[1].period
             elif evt[0] == TIMER:
                 self.timer_monitor.observe(None)
                 if evt[1].overhead > 0:
