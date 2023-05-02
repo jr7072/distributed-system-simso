@@ -6,7 +6,6 @@ class ClusterGenerator(Process):
     def __init__(self, cluster, sim, task_info):
         
         self.task_info = task_info
-        print(self.task_info)
         self.cluster = cluster
         self.name = task_info.name
         self.sim = sim

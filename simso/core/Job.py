@@ -311,6 +311,7 @@ class Job(Process):
 
                 if ret <= 0:
                     # End of job.
+                    self._node.util -= (self.wcet / self.period)
                     self._on_terminated()
 
             else:

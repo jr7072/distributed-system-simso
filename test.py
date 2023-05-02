@@ -19,7 +19,7 @@ def generate_hpc_config(num_clusters, cluster_size, cores, cycles_per_ms=1000000
 
         for _ in range(cluster_size):
 
-            new_node = Configuration(node_name=f"Node {global_node_index}")
+            new_node = Configuration(node_name=f"Node {global_node_index}", cluster=cluster_config.cluster_name)
 
             new_node.name = f"Node {global_node_index}"
             new_node.scheduler_info.clas = "simso.schedulers.EDF" # global edf scheduler for each node
@@ -39,28 +39,28 @@ def generate_tasks(hpc_config, num_tasks, num_task_set, min_period, max_period):
 
     task_metadata = gen_periods_uniform(num_tasks, num_task_set, min_period, max_period)
 
-    for task_index, task_data in enumerate(task_metadata):
 
-        period = task_data[0]
+    for task_index, task_data in enumerate(task_metadata[0]):
+
+        period = task_data
         deadline = 20
 
         hpc_config.add_task(name=f"task {task_index}", identifier=task_index,
-                                    task_type='Cluster', period=period,
-                                    deadline=deadline)
+                                task_type='Cluster', period=period, deadline=deadline, wcet=1)
 
     return hpc_config
 
 if __name__ == '__main__':
     
-    configuration = generate_hpc_config(4, 4, 64)
+    configuration = generate_hpc_config(2, 4, 2)
 
     sim = Simulation()
 
-    print(generate_tasks(configuration, 1, 1, 10, 16).task_info_list)
+    generate_tasks(configuration, 10, 1, 10, 16)
     
     high_performance_computer = HPC(configuration, sim)
     sim.initialize()
 
     sim.activate(high_performance_computer, high_performance_computer.start_hpc())
 
-    sim.simulate(until=1000)
+    sim.simulate(until=100 * configuration.cycles_per_ms)

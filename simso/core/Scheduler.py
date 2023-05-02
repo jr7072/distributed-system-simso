@@ -138,6 +138,7 @@ class Scheduler(object):
         Methods:
         """
         self.sim = sim
+        self.node = node
         self.processors = []
         self.task_list = []
         self._lock = False

@@ -96,5 +96,6 @@ class Timer(object):
         """
         Stop the timer.
         """
+        print("deadline_missed")
         if self.instance:
             self.instance.running = False

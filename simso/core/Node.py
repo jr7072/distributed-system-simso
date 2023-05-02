@@ -35,6 +35,7 @@ class Node(Process):
         proc_info_list = configuration.proc_info_list
 
         self.sim = sim
+        self.cluster = configuration.cluster
         self.util = 0
         self._duration = configuration.duration 
         self._cycles_per_ms = configuration.cycles_per_ms
@@ -156,6 +157,5 @@ class Node(Process):
                 task = evt[1]
                 self.monitor.observe(NodeNewTaskEvent(self.name))
                 self.scheduler.add_task(task)
-                print('here')
                 self.sim.activate(task, task.execute())
              

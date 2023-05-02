@@ -6,6 +6,7 @@ from simso.core.HPCEvent import HPCEvent, HPCTaskReleaseEvent, \
     HPCTaskAssignEvent, HPCTaskFailedAssignEvent
 
 from collections import deque
+import sys
 
 
 class HPC(Process):
@@ -58,16 +59,16 @@ class HPC(Process):
 
         while last_cluster_index != current_cluster_index:
             
-            current_cluster_util = sum([x.util for x in self
-                                            .cluster_list[current_cluster_index]
-                                            .node_list])
+            cluster = self.cluster_list[current_cluster_index]
+            current_cluster_util = cluster.cluster_utilization
 
-            if current_cluster_util + task_info.wcet / task_info.period <= 1:
+            if current_cluster_util + (task_info.wcet / task_info.period) <= cluster.cluster_threshold:
                 
-                self.last_cluster = self.cluster_list[current_cluster_index]
+                self.last_cluster = cluster
+                self.last_cluster.cluster_utilization += (task_info.wcet / task_info.period)
                 cluster_generator = ClusterGenerator(self.last_cluster,
                                                         self.sim, task_info)
-                
+
                 return cluster_generator
 
             current_cluster_index = (current_cluster_index + 1) % \
@@ -77,12 +78,12 @@ class HPC(Process):
 
     def worst_fit(self, task_info):
 
-        min_util = 1
+        min_util = sys.maxsize
         min_cluster = None
 
         for cluster in self.cluster_list:
 
-            cluster_util = sum([x.util for x in cluster.node_list])
+            cluster_util = cluster.cluster_utilization
 
             if cluster_util < min_util:
                 min_util = cluster_util
@@ -91,10 +92,12 @@ class HPC(Process):
         if not min_cluster:
             return None # task failed to be assigned
 
-        if min_util + (task_info.wcet / task_info.period) <= 1:
+        if min_util + (task_info.wcet / task_info.period) <= min_cluster.cluster_threshold:
 
             cluster_generator = ClusterGenerator(min_cluster, self.sim,
                                                     task_info)
+            min_cluster.cluster_utilization += (task_info.wcet / task_info.period)
+
             return cluster_generator 
 
         return None # task failed to be assigned
@@ -124,7 +127,6 @@ class HPC(Process):
         while True:
 
             if not self.evts:
-                print(f"hpc {self.name} waiting at time {self.sim.now()}")
                 yield waituntil, self, lambda: self.evts
             
             evt = self.evts.popleft()

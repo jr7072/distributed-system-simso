@@ -263,6 +263,7 @@ class GenericTask(Process):
     def _job_killer(self, job):
         if job.end_date is None and job.computation_time < job.wcet:
             if self._task_info.abort_on_miss:
+                print(f"missed deadline {job.name}")
                 self.cancel(job)
                 job.abort()
 

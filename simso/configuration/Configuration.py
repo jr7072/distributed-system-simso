@@ -38,7 +38,7 @@ class Configuration(object):
     of this class will be passed to the constructor of the
     :class:`Model <simso.core.Model.Model>` class.
     """
-    def __init__(self, node_name, filename=None):
+    def __init__(self, node_name, cluster, filename=None):
         """
         Args:
             - `filename` A file can be used to initialize the configuration.
@@ -60,6 +60,7 @@ class Configuration(object):
             self.penalty_migration = parser.penalty_migration
         else:
             self.node_name = node_name
+            self.cluster = cluster
             self.etm = "wcet"
             self.duration = 100000000
             self.penalty_preemption = 0

@@ -26,9 +26,13 @@ class Cluster(Process):
         self.node_list = []
 
         for node_config in self.node_config_list:
+            self.core_count = len(node_config.proc_info_list)
             self.node_list.append(Node(node_config, sim))
+        
+        self.node_count = len(self.node_list)
 
         self.evts = deque([])
+        self.cluster_threshold = self.node_count * self.core_count
         self.cluster_utilization = 0
     
     def add_task(self, task_generator):
@@ -58,14 +62,16 @@ class Cluster(Process):
         task_util = task_info.wcet / task_info.period
 
         for node in self.node_list:
-        
+
             if node.util < lowest_utilization:
                 lowest_utilization = node.util
                 lowest_utilization_node = node
         
         if task_util + lowest_utilization > lowest_utilization_node.cores:
             return None
-
+        
+        lowest_utilization_node.util += task_util
+        
         return Task(node=lowest_utilization_node,
                         sim=self.sim, task_info=task_info)
 
