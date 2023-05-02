@@ -5,6 +5,7 @@ from simso.core.ClusterEvent import ClusterEvent, ClusterFailedSchedule,\
 from simso.core.ClusterTask import ClusterGenerator
 from simso.core.Task import Task
 from collections import deque
+import sys
 
 class Cluster(Process):
 
@@ -50,7 +51,7 @@ class Cluster(Process):
             return none if no node can schedule the task
         '''
 
-        lowest_utilization = 1
+        lowest_utilization = sys.maxsize
         lowest_utilization_node = None
         task_info = task_generator.task_info
         task_util = task_info.wcet / task_info.period
@@ -61,7 +62,7 @@ class Cluster(Process):
                 lowest_utilization = node.util
                 lowest_utilization_node = node
         
-        if task_util + lowest_utilization > 1:
+        if task_util + lowest_utilization > lowest_utilization_node.cores:
             return None
 
         return Task(node=lowest_utilization_node,

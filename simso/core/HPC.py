@@ -31,7 +31,7 @@ class HPC(Process):
 
         self.cluster_list = []
 
-        for cluster_config in self.cluster_list:
+        for cluster_config in self.cluster_info:
             self.cluster_list.append(Cluster(cluster_config, sim))
         
         self.last_cluster = None

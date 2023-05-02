@@ -63,6 +63,8 @@ class Node(Process):
             proc = Processor(self, sim, proc_info)
             proc.caches = proc_info.caches
             self._processors.append(proc)
+        
+        self.cores = len(self._processors)
 
         # XXX: too specific.
         self.penalty_preemption = configuration.penalty_preemption
