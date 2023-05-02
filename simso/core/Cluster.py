@@ -78,7 +78,6 @@ class Cluster(Process):
     def start_cluster(self):
 
         for node in self.node_list:
-            print(f"activating node {node.name}")
             self.sim.activate(node, node.start_node())
 
         while True:
@@ -107,6 +106,7 @@ class Cluster(Process):
                     self.monitor.observe(ClusterPassSchedule(self.cluster_name))
                     task._node.new_task(task)
                 else:
+                    print(self.sim.now() * self.cycles_per_ms, 'FAILED_PLACEMENT', task_generator.name, self.cluster_name, '-', '-')
                     self.monitor.observe(ClusterFailedSchedule(self.cluster_name))
             
 

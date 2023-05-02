@@ -53,10 +53,28 @@ class HPC(Process):
 
         if not self.last_cluster:
             self.last_cluster = self.cluster_list[0]
+        
+        if len(self.cluster_list) == 1:
+            
+            cluster_utilization = self.last_cluster.cluster_utilization
+
+            if cluster_utilization + (task_info.wcet / task_info.period) <= self.last_cluster.cluster_threshold:
+                
+
+                self.last_cluster.cluster_utilization += (task_info.wcet / task_info.period)
+                cluster_generator = ClusterGenerator(self.last_cluster,
+                                                        self.sim, task_info)
+                
+                print(self.sim.now() / self.cycles_per_ms, f'FOUND_FIT_1', self.last_cluster.name, '-', '-')
+
+                return cluster_generator
+            
+            return None
 
         last_cluster_index = self.cluster_list.index(self.last_cluster)
         current_cluster_index = (last_cluster_index + 1) % self.num_clusters
 
+        check_count = 1
         while last_cluster_index != current_cluster_index:
             
             cluster = self.cluster_list[current_cluster_index]
@@ -68,9 +86,12 @@ class HPC(Process):
                 self.last_cluster.cluster_utilization += (task_info.wcet / task_info.period)
                 cluster_generator = ClusterGenerator(self.last_cluster,
                                                         self.sim, task_info)
+                
+                print(self.sim.now() / self.cycles_per_ms, f'FOUND_FIT_{check_count}', cluster.cluster_name, '-', '-')
 
                 return cluster_generator
 
+            check_count += 1
             current_cluster_index = (current_cluster_index + 1) % \
                                         self.num_clusters
         
@@ -115,10 +136,7 @@ class HPC(Process):
     
     def start_hpc(self):
         
-        print(f"starting hpc {self.name}")
-
         for cluster in self.cluster_list:
-            print(f"initiating_cluster {cluster.cluster_name}")
             self.sim.activate(cluster, cluster.start_cluster()) # start up the clusters
         
         for task_manager in self.task_list:
@@ -143,4 +161,5 @@ class HPC(Process):
                     task_generator.cluster.add_task(task_generator)
 
                 if not task_generator:
+                    print(self.sim.now() * self.cycles_per_ms, 'FAILED_PARTITION', task_info.name, '-', '-', '-')
                     self.monitor.observe(HPCTaskFailedAssignEvent(task_info))
