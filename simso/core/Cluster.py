@@ -26,6 +26,7 @@ class Cluster(Process):
         self.node_list = []
 
         for node_config in self.node_config_list:
+            node_config.cycles_per_ms = self.cycles_per_ms
             self.core_count = len(node_config.proc_info_list)
             self.node_list.append(Node(node_config, sim))
         
@@ -106,7 +107,7 @@ class Cluster(Process):
                     self.monitor.observe(ClusterPassSchedule(self.cluster_name))
                     task._node.new_task(task)
                 else:
-                    print(self.sim.now() * self.cycles_per_ms, 'FAILED_PLACEMENT', task_generator.name, self.cluster_name, '-', '-')
+                    print(self.sim.now() / self.cycles_per_ms, 'FAILED_PLACEMENT', task_generator.name, self.cluster_name, '-', '-')
                     self.monitor.observe(ClusterFailedSchedule(self.cluster_name))
             
 

@@ -75,5 +75,5 @@ if __name__ == '__main__':
     sim.activate(high_performance_computer, high_performance_computer.start_hpc())
 
     start_time = time.time()
-    sim.simulate(until=7.2e+6 * configuration.cycles_per_ms)
+    sim.simulate(until=60000 * configuration.cycles_per_ms)
     print(f"simulation took {(time.time() - start_time) / 60} minutes")

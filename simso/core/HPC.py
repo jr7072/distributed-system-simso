@@ -65,7 +65,7 @@ class HPC(Process):
                 cluster_generator = ClusterGenerator(self.last_cluster,
                                                         self.sim, task_info)
                 
-                print(self.sim.now() / self.cycles_per_ms, f'FOUND_FIT_1', self.last_cluster.name, '-', '-')
+                print(self.sim.now() / self.cycles_per_ms, f'FOUND_FIT_1', self.last_cluster.cluster_name, '-', '-')
 
                 return cluster_generator
             

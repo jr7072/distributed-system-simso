@@ -263,7 +263,7 @@ class GenericTask(Process):
     def _job_killer(self, job):
         if job.end_date is None and job.computation_time < job.wcet:
             if self._task_info.abort_on_miss:
-                print(self.sim.now() / self._node.cycles_per_ms, f"MISSED_DEADLINE", job.name, self._node.cluster.cluster_name, job.cpu.name)
+                print(self.sim.now() / self._node.cycles_per_ms, f"MISSED_DEADLINE", job.name, self._node.cluster, job.cpu.name)
                 self.cancel(job)
                 job.abort()
 
