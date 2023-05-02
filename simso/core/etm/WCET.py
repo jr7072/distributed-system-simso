@@ -3,8 +3,9 @@ from simso.core.etm.AbstractExecutionTimeModel \
 
 
 class WCET(AbstractExecutionTimeModel):
-    def __init__(self, sim, _):
+    def __init__(self, sim, node, _):
         self.sim = sim
+        self.node = node
         self.executed = {}
         self.on_execute_date = {}
 
@@ -41,7 +42,7 @@ class WCET(AbstractExecutionTimeModel):
         return self.executed[job] + c
 
     def get_ret(self, job):
-        wcet_cycles = int(job.wcet * self.sim.cycles_per_ms)
+        wcet_cycles = int(job.wcet * self.node.cycles_per_ms)
         return int(wcet_cycles - self.get_executed(job))
 
     def update(self):

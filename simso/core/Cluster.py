@@ -18,8 +18,9 @@ class Cluster(Process):
 
         self.cluster_name = cluster_configuration.cluster_name
 
-        Process.__init(self, name=self.cluster_name, sim=sim)
+        Process.__init__(self, name=self.cluster_name, sim=sim)
 
+        self.cycles_per_ms = cluster_configuration.cycles_per_ms
         self.monitor = Monitor(name="Monitor" + self.cluster_name, sim=sim)
         self.node_config_list = cluster_configuration.node_config_list
         self.node_list = []
@@ -71,11 +72,12 @@ class Cluster(Process):
     def start_cluster(self):
 
         for node in self.node_list:
-            node.start_node()
+            print(f"activating node {node.name}")
+            self.sim.activate(node, node.start_node())
 
         while True:
 
-            if not self.evts():
+            if not self.evts:
 
                 yield waituntil, self, lambda: self.evts
             
@@ -83,23 +85,23 @@ class Cluster(Process):
 
             if evt[0] == ClusterEvent.NEW_TASK:
                 
-                self.sim.monitor.observe(ClusterNewTask(self.cluster_name))
+                self.monitor.observe(ClusterNewTask(self.cluster_name))
 
                 task_generator = evt[1]
-                self.sim.activate(task, task.start_generator())
+                self.sim.activate(task_generator, task_generator.start_generator())
         
             if evt[0] == ClusterEvent.SCHEDULE_TASK:
                 
-                self.sim.monitor.observe(ClusterScheduleTask(self.cluster_name))
+                self.monitor.observe(ClusterScheduleTask(self.cluster_name))
                 
                 task_generator = evt[1]
                 task = self.schedule_task(task_generator)
 
                 if task:
-                    self.sim.monitor.observe(ClusterPassSchedule(self.cluster_name))
-                    task.node.add_task(task)
+                    self.monitor.observe(ClusterPassSchedule(self.cluster_name))
+                    task._node.new_task(task)
                 else:
-                    self.sim.monitor.observe(ClusterFailedSchedule(self.cluster_name))
+                    self.monitor.observe(ClusterFailedSchedule(self.cluster_name))
             
 
 

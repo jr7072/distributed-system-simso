@@ -8,7 +8,7 @@ from simso.core.Timer import Timer
 from simso.core.etm import execution_time_models
 from simso.core.Logger import Logger
 from simso.core.results import Results
-from simso.core.NodeEvent import NodeEvent, NodeNewTaskEvent, NodeTaskTerminateEvent
+from simso.core.NodeEvent import NodeEvent, NodeNewTaskEvent
 
 
 class Node(Process):
@@ -45,7 +45,7 @@ class Node(Process):
 
         try:
             self._etm = execution_time_models[configuration.etm](
-                self, len(proc_info_list)
+                self.sim, self, len(proc_info_list)
             )
         except KeyError:
             print("Unknowned Execution Time Model.", configuration.etm)
@@ -76,9 +76,10 @@ class Node(Process):
         self.scheduler.task_list = []
         self.scheduler.processors = self._processors
         self.results = None
+        self.monitor = Monitor(name=self.name, sim=sim)
 
     def now_ms(self):
-        return float(self.now()) / self._cycles_per_ms
+        return float(self.sim.now()) / self._cycles_per_ms
 
     @property
     def logs(self):
@@ -153,7 +154,8 @@ class Node(Process):
             if evt[0] == NodeEvent.NEW_TASK:
                 
                 task = evt[1]
-                self.sim.monitor.observe(NodeNewTaskEvent(self.node_name))
+                self.monitor.observe(NodeNewTaskEvent(self.name))
                 self.scheduler.add_task(task)
-                self.sim.activate(task, task.run())
+                print('here')
+                self.sim.activate(task, task.execute())
              

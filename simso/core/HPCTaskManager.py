@@ -13,7 +13,7 @@ class HPCTaskManager(Process):
 
     def activate_task(self):
 
-        yield self, hold, int(self.task_info.activation_date *
-                                self.sim.cycles_per_ms)
+        yield hold, self, int(self.task_info.activation_date *
+                                self.hpc.cycles_per_ms)
         
         self.hpc.release_task(self.task_info)

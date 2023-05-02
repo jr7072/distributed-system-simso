@@ -48,7 +48,7 @@ class Timer(object):
     The delay is expressed in milliseconds by default but it can also be given
     in cycles.
     """
-    def __init__(self, sim, function, args, delay, one_shot=True, prior=False,
+    def __init__(self, sim, function, args, delay, node, one_shot=True, prior=False,
                  cpu=None, in_ms=True, overhead=0):
         """
         Args:
@@ -68,10 +68,11 @@ class Timer(object):
         Methods:
         """
         self.sim = sim
+        self.node = node
         self.function = function
         self.args = args
         if in_ms:
-            self.delay = int(delay * sim.cycles_per_ms)
+            self.delay = int(delay * node.cycles_per_ms)
         else:
             self.delay = int(delay)
         self.one_shot = one_shot
@@ -79,7 +80,7 @@ class Timer(object):
         self.cpu = cpu
         self.instance = None
         if in_ms:
-            self.overhead = int(overhead * sim.cycles_per_ms)
+            self.overhead = int(overhead * node.cycles_per_ms)
         else:
             self.overhead = int(overhead)
         assert self.delay >= 0, "delay must be >= 0"

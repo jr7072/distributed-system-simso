@@ -16,7 +16,8 @@ class HPC(Process):
         Process.__init__(self, name=self.hpc_name, sim=sim)
         self.monitor = Monitor(name="Monitor" + self.hpc_name, sim=sim)
 
-        self.num_clusters = hpc_configuration.num_clusters
+        self.cycles_per_ms = hpc_configuration.cycles_per_ms
+
         self.cluster_info = hpc_configuration.cluster_info
         self.partition_algorithm = hpc_configuration.partition_algorithm
 
@@ -26,15 +27,18 @@ class HPC(Process):
         self.task_list = []
 
         for task_info in hpc_configuration.task_info_list:
-            task_manager = HPCTaskManager(task_info, sim)
+            task_manager = HPCTaskManager(task_info, self,  sim)
             self.task_list.append(task_manager)
 
         self.cluster_list = []
 
         for cluster_config in self.cluster_info:
+
+            cluster_config.cycles_per_ms = self.cycles_per_ms
             self.cluster_list.append(Cluster(cluster_config, sim))
         
         self.last_cluster = None
+        self.num_clusters = len(self.cluster_list)
         self.evts = deque([])
     
     def release_task(self, task_info):
@@ -107,17 +111,20 @@ class HPC(Process):
         return cluster_generator
     
     def start_hpc(self):
-
+        
+        print(f"starting hpc {self.name}")
 
         for cluster in self.cluster_list:
+            print(f"initiating_cluster {cluster.cluster_name}")
             self.sim.activate(cluster, cluster.start_cluster()) # start up the clusters
         
         for task_manager in self.task_list:
-            self.sim.activate(task_manager, task_manager.activate_tasks()) # start up the task managers
+            self.sim.activate(task_manager, task_manager.activate_task()) # start up the task managers
         
         while True:
 
             if not self.evts:
+                print(f"hpc {self.name} waiting at time {self.sim.now()}")
                 yield waituntil, self, lambda: self.evts
             
             evt = self.evts.popleft()

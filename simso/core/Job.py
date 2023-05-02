@@ -9,7 +9,7 @@ class Job(Process):
     """The Job class simulate the behavior of a real Job. This *should* only be
     instantiated by a Task."""
 
-    def __init__(self, task, name, pred, monitor, etm, sim):
+    def __init__(self, task, name, pred, monitor, etm, sim, node):
         """
         Args:
             - `task`: The parent :class:`task <simso.core.Task.Task>`.
@@ -29,6 +29,7 @@ class Job(Process):
         """
         Process.__init__(self, name=name, sim=sim)
         self._task = task
+        self._node = node
         self._pred = pred
         self.instr_count = 0  # Updated by the cache model.
         self._computation_time = 0
@@ -37,8 +38,8 @@ class Job(Process):
         self._start_date = None
         self._end_date = None
         self._is_preempted = False
-        self._activation_date = self.sim.now_ms()
-        self._absolute_deadline = self.sim.now_ms() + task.deadline
+        self._activation_date = self._node.now_ms()
+        self._absolute_deadline = self._node.now_ms() + task.deadline
         self._aborted = False
         self._sim = sim
         self._monitor = monitor
@@ -57,7 +58,7 @@ class Job(Process):
 
     def _on_activate(self):
         self._monitor.observe(JobEvent(self, JobEvent.ACTIVATE))
-        self._sim.logger.log(self.name + " Activated.", kernel=True)
+        # self._sim.logger.log(self.name + " Activated.", kernel=True)
         self._etm.on_activate(self)
 
     def _on_execute(self):
@@ -70,8 +71,8 @@ class Job(Process):
         self.cpu.was_running = self
 
         self._monitor.observe(JobEvent(self, JobEvent.EXECUTE, self.cpu))
-        self._sim.logger.log("{} Executing on {}".format(
-            self.name, self._task.cpu.name), kernel=True)
+        # self._sim.logger.log("{} Executing on {}".format(
+            # self.name, self._task.cpu.name), kernel=True)
 
     def _on_stop_exec(self):
         if self._last_exec is not None:
@@ -85,8 +86,8 @@ class Job(Process):
         self._was_running_on = self.cpu
 
         self._monitor.observe(JobEvent(self, JobEvent.PREEMPTED))
-        self._sim.logger.log(self.name + " Preempted! ret: " +
-                             str(self.interruptLeft), kernel=True)
+        # self._sim.logger.log(self.name + " Preempted! ret: " +
+                            #  str(self.interruptLeft), kernel=True)
 
     def _on_terminated(self):
         self._on_stop_exec()
@@ -96,7 +97,7 @@ class Job(Process):
         self._monitor.observe(JobEvent(self, JobEvent.TERMINATED))
         self._task.end_job(self)
         self._task.cpu.terminate(self)
-        self._sim.logger.log(self.name + " Terminated.", kernel=True)
+        # self._sim.logger.log(self.name + " Terminated.", kernel=True)
 
     def _on_abort(self):
         self._on_stop_exec()
@@ -106,7 +107,7 @@ class Job(Process):
         self._monitor.observe(JobEvent(self, JobEvent.ABORTED))
         self._task.end_job(self)
         self._task.cpu.terminate(self)
-        self._sim.logger.log("Job " + str(self.name) + " aborted! ret:" + str(self.ret))
+        # self._sim.logger.log("Job " + str(self.name) + " aborted! ret:" + str(self.ret))
 
     def is_running(self):
         """
@@ -140,7 +141,7 @@ class Job(Process):
         True if the end_date is greater than the deadline or if the job was
         aborted.
         """
-        return (self._absolute_deadline * self._sim.cycles_per_ms <
+        return (self._absolute_deadline * self._node.cycles_per_ms <
                 self._end_date or self._aborted)
 
     @property
@@ -161,7 +162,7 @@ class Job(Process):
     @property
     def response_time(self):
         if self._end_date:
-            return (float(self._end_date) / self._sim.cycles_per_ms -
+            return (float(self._end_date) / self._node.cycles_per_ms -
                     self._activation_date)
         else:
             return None
@@ -179,14 +180,14 @@ class Job(Process):
         Dynamic laxity of the job in ms.
         """
         return (self.absolute_deadline - self.ret
-                ) * self.sim.cycles_per_ms - self.sim.now()
+                ) * self._node.cycles_per_ms - self.sim.now()
 
     @property
     def computation_time(self):
         """
         Time spent executing the job in ms.
         """
-        return float(self.computation_time_cycles) / self._sim.cycles_per_ms
+        return float(self.computation_time_cycles) / self._node.cycles_per_ms
 
     @property
     def computation_time_cycles(self):
@@ -206,7 +207,7 @@ class Job(Process):
         whole execution.
         """
         return float(
-            self.actual_computation_time_cycles) / self._sim.cycles_per_ms
+            self.actual_computation_time_cycles) / self._node.cycles_per_ms
 
     @property
     def actual_computation_time_cycles(self):
@@ -262,7 +263,7 @@ class Job(Process):
 
     @property
     def absolute_deadline_cycles(self):
-        return self._absolute_deadline * self._sim.cycles_per_ms
+        return self._absolute_deadline * self._node.cycles_per_ms
 
     @property
     def period(self):

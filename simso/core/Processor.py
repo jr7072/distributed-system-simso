@@ -229,7 +229,7 @@ class Processor(Process):
                 # Forbid to run a job simultaneously on 2 or more processors.
                 running_tasks = [
                     cpu.running.name
-                    for cpu in self._model.processors if cpu.running]
+                    for cpu in self._node.processors if cpu.running]
                 assert len(set(running_tasks)) == len(running_tasks), \
                     "Try to run a job on 2 processors simultaneously!"
 

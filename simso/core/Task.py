@@ -135,7 +135,7 @@ class GenericTask(Process):
         self._activations_fifo = deque([])
         self._node = node
         self.cpu = None
-        self._etm = sim.etm
+        self._etm = node.etm
         self._job_count = 0
         self._last_cpu = None
         self._cpi_alone = {}
@@ -274,7 +274,8 @@ class GenericTask(Process):
             
         self._job_count += 1
         job = Job(self, "{}_{}".format(self.name, self._job_count), pred,
-                  monitor=self._monitor, etm=self._etm, sim=self.sim)
+                    monitor=self._monitor, etm=self._etm, sim=self.sim,
+                    node=self._node)
         
         if len(self._activations_fifo) == 0:
             self.job = job
@@ -283,12 +284,12 @@ class GenericTask(Process):
         self._jobs.append(job)
 
         timer_deadline = Timer(self.sim, GenericTask._job_killer,
-                               (self, job), self.deadline)
+                               (self, job), self.deadline, self._node)
         timer_deadline.start()
 
     def _init(self):
         if self.cpu is None:
-            self.cpu = self.node.processors[0]
+            self.cpu = self._node.processors[0]
 
 
 class ATask(GenericTask):
@@ -354,7 +355,7 @@ class CTask(GenericTask):
         self._init()
         # wait the activation date.
         yield hold, self, int(self._task_info.activation_date *
-                                self._sim.cycles_per_ms)
+                                self._node.cycles_per_ms)
 
 
         #print self.sim.now(), "activate", self.name
