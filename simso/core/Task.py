@@ -274,7 +274,7 @@ class GenericTask(Process):
         """
             
         self._job_count += 1
-        job = Job(self, "{}_{}".format(self.name, self._job_count), pred,
+        job = Job(self, "{}".format(self.name), pred,
                     monitor=self._monitor, etm=self._etm, sim=self.sim,
                     node=self._node)
         
